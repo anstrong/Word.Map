@@ -11,18 +11,29 @@ def read_html(address):
 
 	return html
 
+def get_synonyms(word):
+	url = 'http://www.thesaurus.com/browse/' + word
+
+	# Open and parse page
+	html = read_html(url)
+
+	# Turn raw html into scrapable 'soup'
+	soup = BeautifulSoup(html, "html.parser")
+
+	div = soup.find("div", {"class": "relevancy-list"})
+	span = div.find_all("span", {"class": "text"})
+
+	synonyms = []
+
+	for i in range(len(span)):
+		tag = span[i - 1]
+		synonym = tag.string
+		synonyms.append(synonym)
+
+	return synonyms
+
 ########################################## LOGIC ###############################################
-address = 'http://www.thesaurus.com/browse/human'
+#word = input("What word do you want to map? ")
+word = 'athletic'
 
-# Open and parse page
-html = read_html(address)
-
-# Turn raw html into scrapable 'soup'
-soup = BeautifulSoup(html, "html.parser")
-
-div = soup.find("div", {"class": "relevancy-list"})
-span = div.find_all("span", {"class": "text"})
-
-for i in range(len(span)):
-    tag = span[i - 1]
-    print(tag.string)
+print(get_synonyms(word))
