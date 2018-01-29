@@ -1,19 +1,32 @@
+import urllib
 from urllib.request import Request, urlopen
 from bs4 import BeautifulSoup, SoupStrainer
 import subprocess
 import pydot
+import sys
 
 ####################################### FUNCTIONS ###############################################
 
 def read_html(address):
-	# Open the page
-	url = Request(address, headers={'User-Agent': 'Mozilla/5.0'})
-	# Parse the HTML
-	html = urlopen(url).read()
 
-	return html
+	try:
+		# Open the page
+		url = Request(address, headers={'User-Agent': 'Mozilla/5.0'})
+		# Parse the HTML
+		html = urlopen(url).read()
+
+		return html
+
+	except urllib.error.HTTPError:
+		print('Word not found on Thesaurus.com. Check your spelling or try another word!')
+		sys.exit()
 
 def get_synonyms(word):
+	global level
+
+	level += 1
+	print(level)
+
 	# Replace spaces, if any exist, for url compatibility
 	split_word = word.split(' ')
 	word = '%20'.join(split_word)
@@ -46,6 +59,17 @@ def get_synonyms(word):
 
 def make_node(parent, name):
 	global graph
+	global level
+	global word
+
+	'''
+	if name == word:
+		level = 1
+
+	colors = ['white', 'green', 'blue', 'purple', 'cyan']
+
+	color = colors[level - 1]
+	'''
 
 	# Create new node for word
 	new_node = pydot.Node(name)
@@ -60,43 +84,42 @@ def map_synonym(word):
 	global graph
 	global level
 
+	max_level = 4
+
 	# Scrape synonyms from word's thesaurus page
 	synonyms = get_synonyms(word)
+	print(synonyms)
 
 	for i in range(len(synonyms)):
-		# Add to recursion level number
-		level += 1
-
 		# Create node for word
 		synonym = synonyms[i - 1]
 		make_node(word, synonym)
 
 		# Fetch next level of synonyms
-		if level <= 2:
+		if level < max_level:
 			map_synonym(synonym)
 
 def map_word(word):
 	global graph
 	global level
 
+	max_level = 3
+
 	# Generate node for original parent word
-	if level = 0:
+	if level == 0:
 		graph.add_node(pydot.Node(word))
 
 	# Scrape synonyms from word's thesaurus page
 	synonyms = get_synonyms(word)
+	print(synonyms)
 
 	for i in range(len(synonyms)):
-		# Reset recursion level number
-		level = 1
-
+		level = 2
 		# Create node for word
 		synonym = synonyms[i - 1]
 		make_node(word, synonym)
 
-		# Fetch next level of synonyms
 		map_synonym(synonym)
-
 
 ########################################## LOGIC ###############################################
 # Set default level value
