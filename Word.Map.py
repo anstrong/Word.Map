@@ -5,6 +5,13 @@ import subprocess
 import pydot
 import sys
 
+# Upon my honor, I have neither given nor recieved unauthorized aid.
+
+#Sources:
+#BeautifulSoup Documentation: https://www.crummy.com/software/BeautifulSoup/bs4/doc/
+#urllib documentation: https://docs.python.org/3/library/urllib.request.html#module-urllib.request
+#pydot tutorial: https://pythonhaven.wordpress.com/2009/12/09/generating_graphs_with_pydot/
+
 ####################################### FUNCTIONS ###############################################
 
 def read_html(address):
@@ -25,7 +32,6 @@ def get_synonyms(word):
 	global level
 
 	level += 1
-	print(level)
 
 	# Replace spaces, if any exist, for url compatibility
 	split_word = word.split(' ')
@@ -52,7 +58,7 @@ def get_synonyms(word):
 	# Cycle through synonym-containing tags, isolate string within tag, and save
 	for i in range(len(span)):
 		tag = span[i - 1]
-		synonym = tag.string
+		synonym = tag.get_text()
 		synonyms.append(synonym)
 
 	return synonyms
@@ -61,15 +67,6 @@ def make_node(parent, name):
 	global graph
 	global level
 	global word
-
-	'''
-	if name == word:
-		level = 1
-
-	colors = ['white', 'green', 'blue', 'purple', 'cyan']
-
-	color = colors[level - 1]
-	'''
 
 	# Create new node for word
 	new_node = pydot.Node(name)
@@ -88,6 +85,8 @@ def map_synonym(word):
 
 	# Scrape synonyms from word's thesaurus page
 	synonyms = get_synonyms(word)
+
+	# For debigging and process monitoring
 	print(synonyms)
 
 	for i in range(len(synonyms)):
@@ -122,7 +121,7 @@ def map_word(word):
 		map_synonym(synonym)
 
 ########################################## LOGIC ###############################################
-# Set default level value
+# Set default tree-level value
 level = 0
 
 # Ask for word to map
